@@ -8,17 +8,21 @@ __pycache__/
 .venv/
 venv/
 
-# Testing
+# Testing / coverage
 .pytest_cache/
 .coverage
+.coverage.*
 htmlcov/
 
 # Environment variables
 .env
+.env.*
 
-# IDE
+# IDEs
 .idea/
 *.iml
+.vscode/
+.idea/workspace.xml
 
 # Operating system
 .DS_Store
@@ -29,9 +33,22 @@ build/
 dist/
 *.egg-info/
 
+# Logs
+*.log
+
 # Frontend
 node_modules/
 frontend/dist/
 
-# Logs
-*.log
+# Python tooling
+.mypy_cache/
+.ruff_cache/
+
+# Local database / runtime files
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
