@@ -6,7 +6,7 @@ def test_generate_realistic_short_haul_scenario() -> None:
     scenario = generate_short_haul_scenario()
 
     assert len(scenario.airports) == 7
-    assert len(scenario.aircraft) == 3
+    assert len(scenario.aircraft) == 4
     assert len(scenario.flights) == 12
 
 
@@ -84,29 +84,39 @@ def test_aircraft_rotations_are_geographically_continuous() -> None:
                 == aircraft.aircraft_id
             ],
             key=lambda flight:
-            flight.scheduled_departure
+            flight.scheduled_departure,
         )
 
-        assert flights[0].origin == aircraft.home_airport
+        if not flights:
+            continue
+
+        assert (
+            flights[0].origin
+            == aircraft.home_airport
+        )
 
         for previous, current in zip(
             flights,
-            flights[1:]
+            flights[1:],
         ):
             assert (
-                previous.destination == current.origin
+                previous.destination
+                == current.origin
             )
 
             turnaround = (
-                current.scheduled_departure - previous.scheduled_departure
+                current.scheduled_departure
+                - previous.scheduled_arrival
             )
 
             turnaround_minutes = (
-                turnaround.total_seconds() / 60
+                turnaround.total_seconds()
+                / 60
             )
 
             assert (
-                turnaround_minutes >= MINIMUM_TURNAROUND_MINUTES
+                turnaround_minutes
+                >= MINIMUM_TURNAROUND_MINUTES
             )
 
 def test_scenario_uses_requested_operating_date() -> None:
@@ -121,3 +131,21 @@ def test_scenario_uses_requested_operating_date() -> None:
         for flight in scenario.flights
     )
 
+def test_scenario_contains_reserve_aircraft() -> None:
+    scenario = generate_short_haul_scenario()
+
+    reserve = next(
+        aircraft
+        for aircraft in scenario.aircraft
+        if aircraft.aircraft_id == "AC004"
+    )
+
+    assigned_flights = [
+        flight
+        for flight in scenario.flights
+        if flight.aircraft_id
+        == reserve.aircraft_id
+    ]
+
+    assert reserve.home_airport == "LHR"
+    assert assigned_flights == []

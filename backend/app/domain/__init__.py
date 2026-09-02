@@ -1,3 +1,8 @@
+from backend.app.domain.disruptions import (
+    AircraftUnavailability,
+    DisruptionAssessment,
+    FlightImpact,
+)
 from backend.app.domain.models import (
     Aircraft,
     AircraftType,
@@ -5,8 +10,11 @@ from backend.app.domain.models import (
     Flight,
     ScheduleScenario,
 )
-
-from backend.app.domain.disruptions import AircraftUnavailability, DisruptionAssessment, FlightImpact
+from backend.app.domain.recovery import (
+    RecoveredFlight,
+    RecoveryActionType,
+    RecoveryPlan,
+)
 
 __all__ = [
     "Aircraft",
@@ -16,5 +24,8 @@ __all__ = [
     "DisruptionAssessment",
     "Flight",
     "FlightImpact",
+    "RecoveredFlight",
+    "RecoveryActionType",
+    "RecoveryPlan",
     "ScheduleScenario",
 ]
