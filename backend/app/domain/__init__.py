@@ -35,12 +35,20 @@ from backend.app.domain.risk import (
     SimulationSample,
     StrategyRiskMetrics,
 )
+from backend.app.domain.persistence import (
+    AnalysisCaseDetail,
+    AnalysisCaseList,
+    AnalysisCaseSummary,
+)
 
 __all__ = [
     "Aircraft",
     "AircraftType",
     "AircraftUnavailability",
     "Airport",
+    "AnalysisCaseDetail",
+    "AnalysisCaseList",
+    "AnalysisCaseSummary",
     "DecisionAnalysis",
     "DecisionWeights",
     "DisruptionAssessment",
