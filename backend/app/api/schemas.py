@@ -42,3 +42,5 @@ class DecisionRequest(DisruptionRequest):
     )
 
 
+class SaveAnalysisCaseRequest(DecisionRequest):
+    pass

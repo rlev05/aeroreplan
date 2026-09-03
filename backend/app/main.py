@@ -1,5 +1,16 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from backend.app.api import router as api_router
+from backend.app.persistence import init_database
+
+
+@asynccontextmanager
+async def lifespan(
+        app: FastAPI,
+):
+    init_database()
+
+    yield
 
 app = FastAPI(
     title="AeroReplan API",
@@ -7,6 +18,7 @@ app = FastAPI(
         "disruption recovery."
                  ),
     version="0.1.0",
+    lifespan=lifespan
 )
 
 app.include_router(api_router)
