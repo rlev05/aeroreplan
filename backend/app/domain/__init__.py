@@ -3,6 +3,10 @@ from backend.app.domain.disruptions import (
     DisruptionAssessment,
     FlightImpact,
 )
+from backend.app.domain.emissions import (
+    EmissionsComparison,
+    StrategyEmissions,
+)
 from backend.app.domain.kpis import (
     RecoveryCostAssumptions,
     StrategyComparison,
@@ -27,6 +31,7 @@ __all__ = [
     "AircraftUnavailability",
     "Airport",
     "DisruptionAssessment",
+    "EmissionsComparison",
     "Flight",
     "FlightImpact",
     "RecoveredFlight",
@@ -35,5 +40,6 @@ __all__ = [
     "RecoveryPlan",
     "ScheduleScenario",
     "StrategyComparison",
+    "StrategyEmissions",
     "StrategyKPIs",
 ]

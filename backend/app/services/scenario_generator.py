@@ -100,8 +100,8 @@ def create_aircraft() -> list[Aircraft]:
         Aircraft(
             aircraft_id="AC004",
             tail_number="G-ARPD",
-            aircraft_type=AircraftType.AIRBUS_A320,
-            seat_capacity=180,
+            aircraft_type=AircraftType.AIRBUS_A321,
+            seat_capacity=220,
             home_airport="LHR"
         ),
     ]

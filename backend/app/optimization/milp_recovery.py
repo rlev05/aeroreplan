@@ -3,10 +3,10 @@ from datetime import timedelta
 from time import perf_counter
 from ortools.linear_solver import pywraplp
 from pydantic import BaseModel, Field
-
 from backend.app.domain import Aircraft, AircraftUnavailability, Flight, RecoveredFlight, RecoveryActionType, RecoveryPlan, ScheduleScenario
 from backend.app.services.disruption_engine import assess_aircraft_unavailability
 from backend.app.services import MINIMUM_TURNAROUND_MINUTES
+from backend.app.services.emissions import estimate_flight_emissions_kg
 
 class OptimizationWeights(BaseModel):
     delay_minute_cost: float = Field(
@@ -24,6 +24,11 @@ class OptimizationWeights(BaseModel):
         ge=0,
     )
 
+    emissions_cost_per_kg_co2e: float = Field(
+        default=0.0,
+        ge=0,
+    )
+
 
 class MILPRecoveryResult(BaseModel):
     plan: RecoveryPlan
@@ -34,6 +39,7 @@ class MILPRecoveryResult(BaseModel):
     solve_time_ms: float = Field(ge=0)
     candidate_count: int = Field(ge=1)
 
+    incremental_emissions_kg_co2e: float
 
 @dataclass(frozen=True)
 class _RecoveryCandidate:
@@ -43,6 +49,8 @@ class _RecoveryCandidate:
     total_delay_minutes: int
     passenger_delay_minutes: int
     reassigned_flights: int
+
+    incremental_emissions_kg_co2e: float
 
 
 def _aircraft_can_operate_tail(
@@ -123,6 +131,13 @@ def _create_candidates(
         for impact in baseline.impacts
     }
 
+    aircraft_by_id = {
+        aircraft.aircraft_id: aircraft
+        for aircraft in scenario.aircraft
+    }
+
+    original_aircraft = aircraft_by_id[disruption.aircraft_id]
+
     impacted_flight_ids = set(
         baseline_by_flight
     )
@@ -155,6 +170,7 @@ def _create_candidates(
                 baseline_passenger_delay
             ),
             reassigned_flights=0,
+            incremental_emissions_kg_co2e=0.0
         )
     ]
 
@@ -209,6 +225,18 @@ def _create_candidates(
             if not feasible:
                 continue
 
+            incremental_emissions = sum(
+                estimate_flight_emissions_kg(
+                    flight.distance_km,
+                    aircraft.aircraft_type,
+                )
+                - estimate_flight_emissions_kg(
+                    flight.distance_km,
+                    original_aircraft.aircraft_type,
+                )
+                for flight in proposed_tail
+            )
+
             candidates.append(
                 _RecoveryCandidate(
                     recovery_aircraft_id=(
@@ -225,6 +253,10 @@ def _create_candidates(
                     ),
                     reassigned_flights=len(
                         proposed_tail
+                    ),
+                    incremental_emissions_kg_co2e=round(
+                        incremental_emissions,
+                        2
                     ),
                 )
             )
@@ -366,13 +398,22 @@ def optimize_recovery(
         )
     )
 
+    incremental_emissions = sum(
+        candidate.incremental_emissions_kg_co2e
+        * candidate_selected[index]
+        for index, candidate
+        in enumerate(candidates)
+    )
+
     objective = (
-        weights.delay_minute_cost
-        * total_delay
-        + weights.passenger_delay_minute_cost
-        * passenger_delay
-        + weights.reassignment_cost
-        * reassignment_count
+            weights.delay_minute_cost
+            * total_delay
+            + weights.passenger_delay_minute_cost
+            * passenger_delay
+            + weights.reassignment_cost
+            * reassignment_count
+            + weights.emissions_cost_per_kg_co2e
+            * incremental_emissions
     )
 
     solver.Minimize(objective)
@@ -560,4 +601,5 @@ def optimize_recovery(
         candidate_count=len(
             candidates
         ),
+        incremental_emissions_kg_co2e=selected.incremental_emissions_kg_co2e,
     )
