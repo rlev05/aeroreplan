@@ -24,6 +24,12 @@ from backend.app.domain.recovery import (
     RecoveryActionType,
     RecoveryPlan,
 )
+from backend.app.domain.risk import (
+    MonteCarloConfig,
+    MonteCarloResult,
+    SimulationSample,
+    StrategyRiskMetrics,
+)
 
 __all__ = [
     "Aircraft",
@@ -34,12 +40,16 @@ __all__ = [
     "EmissionsComparison",
     "Flight",
     "FlightImpact",
+    "MonteCarloConfig",
+    "MonteCarloResult",
     "RecoveredFlight",
     "RecoveryActionType",
     "RecoveryCostAssumptions",
     "RecoveryPlan",
     "ScheduleScenario",
+    "SimulationSample",
     "StrategyComparison",
     "StrategyEmissions",
     "StrategyKPIs",
+    "StrategyRiskMetrics",
 ]
