@@ -3,6 +3,11 @@ from backend.app.domain.disruptions import (
     DisruptionAssessment,
     FlightImpact,
 )
+from backend.app.domain.kpis import (
+    RecoveryCostAssumptions,
+    StrategyComparison,
+    StrategyKPIs,
+)
 from backend.app.domain.models import (
     Aircraft,
     AircraftType,
@@ -26,6 +31,9 @@ __all__ = [
     "FlightImpact",
     "RecoveredFlight",
     "RecoveryActionType",
+    "RecoveryCostAssumptions",
     "RecoveryPlan",
     "ScheduleScenario",
+    "StrategyComparison",
+    "StrategyKPIs",
 ]
