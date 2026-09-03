@@ -1,3 +1,8 @@
+from backend.app.domain.decision import (
+    DecisionAnalysis,
+    DecisionWeights,
+    StrategyDecisionPoint,
+)
 from backend.app.domain.disruptions import (
     AircraftUnavailability,
     DisruptionAssessment,
@@ -36,6 +41,8 @@ __all__ = [
     "AircraftType",
     "AircraftUnavailability",
     "Airport",
+    "DecisionAnalysis",
+    "DecisionWeights",
     "DisruptionAssessment",
     "EmissionsComparison",
     "Flight",
@@ -49,6 +56,7 @@ __all__ = [
     "ScheduleScenario",
     "SimulationSample",
     "StrategyComparison",
+    "StrategyDecisionPoint",
     "StrategyEmissions",
     "StrategyKPIs",
     "StrategyRiskMetrics",
