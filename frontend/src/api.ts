@@ -1,10 +1,13 @@
 import type {
+  AnalysisCaseDetail,
+  AnalysisCaseList,
   DecisionAnalysis,
   DecisionRequest,
   DisruptionAssessment,
   DisruptionRequest,
   MILPRecoveryResult,
   MonteCarloResult,
+  SaveAnalysisCaseRequest,
   ScheduleScenario,
   SimulationRequest,
   StrategyComparison,
@@ -108,5 +111,33 @@ export async function runMonteCarlo(
   return postJson<MonteCarloResult>(
     "/api/simulation/monte-carlo",
     request,
+  );
+}
+
+
+export async function saveAnalysisCase(
+  request: SaveAnalysisCaseRequest,
+): Promise<AnalysisCaseDetail> {
+  return postJson<AnalysisCaseDetail>(
+    "/api/cases/analyze",
+    request,
+  );
+}
+
+
+export async function fetchAnalysisCases(
+  limit = 50,
+): Promise<AnalysisCaseList> {
+  return requestJson<AnalysisCaseList>(
+    `/api/cases?limit=${limit}`,
+  );
+}
+
+
+export async function fetchAnalysisCase(
+  caseId: string,
+): Promise<AnalysisCaseDetail> {
+  return requestJson<AnalysisCaseDetail>(
+    `/api/cases/${caseId}`,
   );
 }

@@ -235,3 +235,30 @@ export interface MonteCarloResult {
 
   samples: SimulationSample[];
 }
+
+export interface AnalysisCaseSummary {
+  case_id: string;
+  created_at: string;
+  operating_date: string;
+  seed: number;
+  disruption_id: string;
+  aircraft_id: string;
+  recommended_strategy: string;
+}
+
+export interface AnalysisCaseDetail {
+  case_id: string;
+  created_at: string;
+  operating_date: string;
+  seed: number;
+  disruption: AircraftUnavailability;
+  comparison: StrategyComparison;
+  decision: DecisionAnalysis;
+}
+
+export interface AnalysisCaseList {
+  cases: AnalysisCaseSummary[];
+}
+
+export type SaveAnalysisCaseRequest =
+  DecisionRequest;

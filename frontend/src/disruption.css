@@ -333,3 +333,38 @@
       repeat(2, 1fr);
   }
 }
+
+.decision-save-button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+
+  border: 1px solid #31516c;
+  border-radius: 7px;
+
+  color: #9bcbed;
+  background: #0d1c29;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+
+  cursor: pointer;
+}
+
+.decision-save-button:hover {
+  background: #112638;
+}
+
+.decision-save-button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.saved-case-message {
+  margin: 8px 0 0;
+
+  color: #67bd97;
+  font-size: 9px;
+  text-align: center;
+}

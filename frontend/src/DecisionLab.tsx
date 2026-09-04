@@ -6,6 +6,7 @@ import {
 import {
   analyzeDecisions,
   runMonteCarlo,
+  saveAnalysisCase,
 } from "./api";
 
 import type {
@@ -120,6 +121,18 @@ function DecisionLab({
   ] = useState(false);
 
   const [
+    saving,
+    setSaving,
+  ] = useState(false);
+
+  const [
+    savedCaseId,
+    setSavedCaseId,
+  ] = useState<
+    string | null
+  >(null);
+
+  const [
     error,
     setError,
   ] = useState<
@@ -152,12 +165,14 @@ function DecisionLab({
     value: number,
   ) {
     setWeights(
-      (
-        current,
-      ) => ({
+      (current) => ({
         ...current,
         [key]: value,
       }),
+    );
+
+    setSavedCaseId(
+      null,
     );
   }
 
@@ -165,6 +180,7 @@ function DecisionLab({
   async function runAnalysis() {
     setRunning(true);
     setError(null);
+    setSavedCaseId(null);
 
     try {
       const [
@@ -200,6 +216,45 @@ function DecisionLab({
       );
     } finally {
       setRunning(false);
+    }
+  }
+
+
+  async function saveCase() {
+    if (!result) {
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    try {
+      const savedCase =
+        await saveAnalysisCase({
+          ...request,
+          config,
+          weights,
+        });
+
+      setSavedCaseId(
+        savedCase.case_id,
+      );
+
+      window.dispatchEvent(
+        new Event(
+          "aeroreplan-case-saved",
+        ),
+      );
+    } catch (saveError) {
+      console.error(
+        saveError,
+      );
+
+      setError(
+        "Case could not be saved. Check the database connection and try again.",
+      );
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -358,12 +413,17 @@ function DecisionLab({
                   iterations
                 }
                 onChange={
-                  (event) =>
+                  (event) => {
                     setIterations(
                       Number(
                         event.target.value,
                       ),
-                    )
+                    );
+
+                    setSavedCaseId(
+                      null,
+                    );
+                  }
                 }
               />
             </label>
@@ -388,12 +448,17 @@ function DecisionLab({
                   uncertainty
                 }
                 onChange={
-                  (event) =>
+                  (event) => {
                     setUncertainty(
                       Number(
                         event.target.value,
                       ),
-                    )
+                    );
+
+                    setSavedCaseId(
+                      null,
+                    );
+                  }
                 }
               />
             </label>
@@ -422,12 +487,17 @@ function DecisionLab({
                   confidence
                 }
                 onChange={
-                  (event) =>
+                  (event) => {
                     setConfidence(
                       Number(
                         event.target.value,
                       ),
-                    )
+                    );
+
+                    setSavedCaseId(
+                      null,
+                    );
+                  }
                 }
               />
             </label>
@@ -438,6 +508,7 @@ function DecisionLab({
             className="decision-run-button"
             disabled={
               running
+              || saving
             }
             onClick={
               () =>
@@ -450,6 +521,45 @@ function DecisionLab({
                 : "RUN DECISION ANALYSIS"
             }
           </button>
+
+
+          {
+            result && (
+              <button
+                className="decision-save-button"
+                disabled={
+                  saving
+                }
+                onClick={
+                  () =>
+                    void saveCase()
+                }
+              >
+                {
+                  saving
+                    ? "SAVING…"
+                    : savedCaseId
+                      ? "CASE SAVED"
+                      : "SAVE ANALYSIS CASE"
+                }
+              </button>
+            )
+          }
+
+
+          {
+            savedCaseId && (
+              <p className="saved-case-message">
+                Saved as{" "}
+                {
+                  savedCaseId
+                    .slice(0, 8)
+                }
+                …
+              </p>
+            )
+          }
+
 
           {
             error && (
@@ -716,11 +826,11 @@ function StrategyFrontier({
                   {
                     strategy
                       .is_pareto_optimal
-                      && (
-                        <span>
-                          PARETO
-                        </span>
-                      )
+                    && (
+                      <span>
+                        PARETO
+                      </span>
+                    )
                   }
                 </div>
 
