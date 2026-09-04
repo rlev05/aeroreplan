@@ -147,3 +147,91 @@ export interface StrategyComparison {
   recommended_strategy: string;
   estimated_savings_vs_baseline_gbp: number;
 }
+
+export interface MonteCarloConfig {
+  iterations: number;
+  end_time_stddev_minutes: number;
+  risk_confidence: number;
+  severe_delay_threshold_minutes: number;
+  seed: number;
+}
+
+export interface DecisionWeights {
+  expected_cost_weight: number;
+  cvar_weight: number;
+  delay_weight: number;
+  emissions_weight: number;
+}
+
+export interface DecisionRequest
+  extends DisruptionRequest {
+  config: MonteCarloConfig;
+  weights: DecisionWeights;
+}
+
+export interface SimulationRequest
+  extends DisruptionRequest {
+  config: MonteCarloConfig;
+}
+
+export interface StrategyDecisionPoint {
+  strategy: string;
+  expected_cost_gbp: number;
+  cvar_cost_gbp: number;
+  expected_delay_minutes: number;
+  emissions_kg_co2e: number;
+  is_pareto_optimal: boolean;
+}
+
+export interface DecisionAnalysis {
+  strategies: StrategyDecisionPoint[];
+  recommended_strategy: string;
+  pareto_strategies: string[];
+}
+
+export interface SimulationSample {
+  sample_id: number;
+  disruption_end_time: string;
+
+  baseline_delay_minutes: number;
+  greedy_delay_minutes: number;
+  optimized_delay_minutes: number;
+
+  baseline_cost_gbp: number;
+  greedy_cost_gbp: number;
+  optimized_cost_gbp: number;
+}
+
+export interface StrategyRiskMetrics {
+  strategy: string;
+
+  mean_delay_minutes: number;
+  p90_delay_minutes: number;
+  p95_delay_minutes: number;
+  worst_case_delay_minutes: number;
+
+  severe_delay_probability_percent: number;
+
+  mean_cost_gbp: number;
+  cost_stddev_gbp: number;
+
+  value_at_risk_gbp: number;
+  conditional_value_at_risk_gbp: number;
+
+  worst_case_cost_gbp: number;
+}
+
+export interface MonteCarloResult {
+  iterations: number;
+  seed: number;
+
+  end_time_stddev_minutes: number;
+  risk_confidence: number;
+  severe_delay_threshold_minutes: number;
+
+  baseline: StrategyRiskMetrics;
+  greedy: StrategyRiskMetrics;
+  optimized: StrategyRiskMetrics;
+
+  samples: SimulationSample[];
+}

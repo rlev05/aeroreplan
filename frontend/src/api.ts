@@ -1,8 +1,12 @@
 import type {
+  DecisionAnalysis,
+  DecisionRequest,
   DisruptionAssessment,
   DisruptionRequest,
   MILPRecoveryResult,
+  MonteCarloResult,
   ScheduleScenario,
+  SimulationRequest,
   StrategyComparison,
 } from "./types";
 
@@ -31,6 +35,26 @@ async function requestJson<T>(
 }
 
 
+function postJson<T>(
+  url: string,
+  payload: unknown,
+): Promise<T> {
+  return requestJson<T>(
+    url,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify(
+        payload,
+      ),
+    },
+  );
+}
+
+
 export async function fetchScenario(): Promise<ScheduleScenario> {
   return requestJson<ScheduleScenario>(
     "/api/scenario",
@@ -41,15 +65,9 @@ export async function fetchScenario(): Promise<ScheduleScenario> {
 export async function assessDisruption(
   request: DisruptionRequest,
 ): Promise<DisruptionAssessment> {
-  return requestJson<DisruptionAssessment>(
+  return postJson<DisruptionAssessment>(
     "/api/disruption/assess",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    },
+    request,
   );
 }
 
@@ -57,15 +75,9 @@ export async function assessDisruption(
 export async function optimizeRecovery(
   request: DisruptionRequest,
 ): Promise<MILPRecoveryResult> {
-  return requestJson<MILPRecoveryResult>(
+  return postJson<MILPRecoveryResult>(
     "/api/recovery/optimize",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    },
+    request,
   );
 }
 
@@ -73,14 +85,28 @@ export async function optimizeRecovery(
 export async function compareStrategies(
   request: DisruptionRequest,
 ): Promise<StrategyComparison> {
-  return requestJson<StrategyComparison>(
+  return postJson<StrategyComparison>(
     "/api/analytics/compare",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    },
+    request,
+  );
+}
+
+
+export async function analyzeDecisions(
+  request: DecisionRequest,
+): Promise<DecisionAnalysis> {
+  return postJson<DecisionAnalysis>(
+    "/api/decision/analyze",
+    request,
+  );
+}
+
+
+export async function runMonteCarlo(
+  request: SimulationRequest,
+): Promise<MonteCarloResult> {
+  return postJson<MonteCarloResult>(
+    "/api/simulation/monte-carlo",
+    request,
   );
 }
