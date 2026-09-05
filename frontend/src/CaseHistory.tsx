@@ -1,5 +1,4 @@
 import {
-  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -114,46 +113,59 @@ function CaseHistory() {
   >(null);
 
 
-  const loadCases =
-    useCallback(
-      async () => {
-        try {
-          const result =
-            await fetchAnalysisCases();
-
-          setCases(
-            result.cases,
-          );
-
-          setError(
-            null,
-          );
-        } catch (
-          loadError
-        ) {
-          console.error(
-            loadError,
-          );
-
-          setError(
-            "Saved cases could not be loaded.",
-          );
-        } finally {
-          setLoading(
-            false,
-          );
-        }
-      },
-      [],
-    );
-
-
   useEffect(() => {
-    void loadCases();
+    let cancelled = false;
+
+    function refreshCases() {
+      void fetchAnalysisCases()
+        .then(
+          (result) => {
+            if (cancelled) {
+              return;
+            }
+
+            setCases(
+              result.cases,
+            );
+
+            setError(
+              null,
+            );
+          },
+        )
+        .catch(
+          (loadError) => {
+            console.error(
+              loadError,
+            );
+
+            if (cancelled) {
+              return;
+            }
+
+            setError(
+              "Saved cases could not be loaded.",
+            );
+          },
+        )
+        .finally(
+          () => {
+            if (cancelled) {
+              return;
+            }
+
+            setLoading(
+              false,
+            );
+          },
+        );
+    }
 
     function handleCaseSaved() {
-      void loadCases();
+      refreshCases();
     }
+
+    refreshCases();
 
     window.addEventListener(
       "aeroreplan-case-saved",
@@ -161,12 +173,14 @@ function CaseHistory() {
     );
 
     return () => {
+      cancelled = true;
+
       window.removeEventListener(
         "aeroreplan-case-saved",
         handleCaseSaved,
       );
     };
-  }, [loadCases]);
+  }, []);
 
 
   async function openCase(

@@ -1,0 +1,74 @@
+services:
+  database:
+    image: postgres:16-alpine
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-aeroreplan}
+      POSTGRES_USER: ${POSTGRES_USER:-aeroreplan}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-aeroreplan_local}
+
+    volumes:
+      - aeroreplan_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-aeroreplan} -d ${POSTGRES_DB:-aeroreplan}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+    restart: unless-stopped
+
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+
+    environment:
+      AEROREPLAN_DATABASE_URL: >-
+        postgresql+psycopg://${POSTGRES_USER:-aeroreplan}:${POSTGRES_PASSWORD:-aeroreplan_local}@database:5432/${POSTGRES_DB:-aeroreplan}
+
+    depends_on:
+      database:
+        condition: service_healthy
+
+    ports:
+      - "8000:8000"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+    restart: unless-stopped
+
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    ports:
+      - "8080:80"
+
+    restart: unless-stopped
+
+
+volumes:
+  aeroreplan_postgres_data:

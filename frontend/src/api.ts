@@ -15,8 +15,13 @@ import type {
 
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ??
-  "http://127.0.0.1:8000";
+  import.meta.env
+    .VITE_API_BASE_URL
+  ?? (
+    import.meta.env.DEV
+      ? "http://127.0.0.1:8000"
+      : ""
+  );
 
 
 async function requestJson<T>(
@@ -29,8 +34,12 @@ async function requestJson<T>(
   );
 
   if (!response.ok) {
+    const body =
+      await response.text();
+
     throw new Error(
-      `API request failed with status ${response.status}`,
+      `API request failed with status `
+      + `${response.status}: ${body}`,
     );
   }
 
